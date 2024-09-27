@@ -269,24 +269,28 @@ GameManager.prototype.tileMatchesAvailable = function () {
 
   for (let x = 0; x < this.size; x++) {
     for (let y = 0; y < this.size; y++) {
-      tile = this.grid.cellContent({ x: x, y: y });
-
-      if (!tile) continue 
-      for (let direction = 0; direction < 4; direction++) {
-        let vector = self.getVector(direction);
-        let cell   = { x: x + vector.x, y: y + vector.y };
-
-        let other  = self.grid.cellContent(cell);
-
-        if (other && other.value === tile.value) {
-          return true;
-        }
-      }
+      if (this.tilesMatch) return true
     }
   }
 
   return false;
 };
+
+GameManager.prototype.tilesMatch = function(x, y){
+  tile = this.grid.cellContent({ x: x, y: y });
+
+  if (!tile) return false 
+  for (let direction = 0; direction < 4; direction++) {
+    let vector = self.getVector(direction);
+    let cell   = { x: x + vector.x, y: y + vector.y };
+
+    let other  = self.grid.cellContent(cell);
+
+    if (other && other.value === tile.value) {
+      return true;
+    }
+  }
+}
 
 GameManager.prototype.positionsEqual = function (first, second) {
   return first.x === second.x && first.y === second.y;

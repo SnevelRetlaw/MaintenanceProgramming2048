@@ -14,8 +14,8 @@
     // The className needs to be trimmed and split on whitespace
     // to retrieve a list of classes.
     let classes = el.className.replace(/^\s+|\s+$/g, '').split(/\s+/);
-    for (let i = 0; i < classes.length; i++) {
-      push.call(this, classes[i]);
+    for (const element of classes) {
+      push.call(this, classes[element]);
     }
   }
 

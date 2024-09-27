@@ -263,10 +263,6 @@ GameManager.prototype.movesAvailable = function () {
 
 // Check for available matches between tiles (more expensive check)
 GameManager.prototype.tileMatchesAvailable = function () {
-  let self = this;
-
-  let tile;
-
   for (let x = 0; x < this.size; x++) {
     for (let y = 0; y < this.size; y++) {
       if (this.tilesMatch(x, y)) return true
@@ -276,7 +272,10 @@ GameManager.prototype.tileMatchesAvailable = function () {
   return false;
 };
 
-GameManager.prototype.tilesMatch = function(x, y){
+GameManager.prototype.tilesMatch = function(x, y){  
+  let self = this;
+  let tile;
+
   tile = this.grid.cellContent({ x: x, y: y });
 
   if (!tile) return false 

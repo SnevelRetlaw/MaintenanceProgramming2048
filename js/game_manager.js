@@ -271,17 +271,15 @@ GameManager.prototype.tileMatchesAvailable = function () {
     for (let y = 0; y < this.size; y++) {
       tile = this.grid.cellContent({ x: x, y: y });
 
-      if (tile) {
-        for (let direction = 0; direction < 4; direction++) {
-          let vector = self.getVector(direction);
-          let cell   = { x: x + vector.x, y: y + vector.y };
+      if (!tile) continue 
+      for (let direction = 0; direction < 4; direction++) {
+        let vector = self.getVector(direction);
+        let cell   = { x: x + vector.x, y: y + vector.y };
 
-          let other  = self.grid.cellContent(cell);
+        let other  = self.grid.cellContent(cell);
 
-          if (other && other.value === tile.value) {
-            //TODO: remove comment
-            return true; // These two tiles can be merged
-          }
+        if (other && other.value === tile.value) {
+          return true;
         }
       }
     }

@@ -15,7 +15,8 @@ window.fakeStorage = {
   },
 
   clear: function () {
-    return this._data = {};
+    this._data = {}
+    return this._data;
   }
 };
 

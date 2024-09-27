@@ -121,8 +121,14 @@ KeyboardInputManager.prototype.listen = function () {
     let absDy = Math.abs(dy);
 
     if (Math.max(absDx, absDy) > 10) {
-      // (right : left) : (down : up)
-      self.emit("move", absDx > absDy ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0));
+      // 0 = up, 1 = right, 3 = left, 2 = down
+      let result 
+      if (absDx > absDy){
+        result = dx > 0 ? 1 : 3 
+      } else {
+        result = dy > 0 ? 2 : 0
+      }
+      self.emit("move", result);
     }
   });
 };

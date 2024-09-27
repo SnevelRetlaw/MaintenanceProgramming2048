@@ -2,7 +2,8 @@ window.fakeStorage = {
   _data: {},
 
   setItem: function (id, val) {
-    return this._data[id] = String(val);
+    this._data[id] = String(val)
+    return this._data[id]
   },
 
   getItem: function (id) {

@@ -269,7 +269,7 @@ GameManager.prototype.tileMatchesAvailable = function () {
 
   for (let x = 0; x < this.size; x++) {
     for (let y = 0; y < this.size; y++) {
-      if (this.tilesMatch) return true
+      if (this.tilesMatch(x, y)) return true
     }
   }
 

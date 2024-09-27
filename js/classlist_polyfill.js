@@ -33,7 +33,8 @@
     },
     remove: function (token) {
       if (!this.contains(token)) return;
-      for (let i = 0; i < this.length; i++) {
+      let i = 0
+      for (i; i < this.length; i++) {
         if (this[i] == token) break;
       }
       splice.call(this, i, 1);

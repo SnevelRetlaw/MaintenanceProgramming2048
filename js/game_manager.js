@@ -175,8 +175,8 @@ GameManager.prototype.move = function (direction) {
   // TODO: remove
   // 0: up, 1: right, 2: down, 3: left
 
-  var scoreGoal = this.scoreGoal;
-  var self = this;
+  let scoreGoal = this.scoreGoal;
+  let self = this;
 
   console.log(scoreGoal);
 

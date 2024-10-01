@@ -173,13 +173,11 @@ GameManager.prototype.move = function (direction) {
 
       if (tile) {
         let positions = self.findFarthestPosition(cell, vector);
-        let next      = self.grid.cellContent(positions.next);
+        let nextCell      = self.grid.cellContent(positions.nextCell);
 
-        // TODO: what does this comment mean?
-        // Only one merger per row traversal?
-        if (next && next.value === tile.value && !next.mergedFrom) {
+        if (nextCell && nextCell.value === tile.value && !nextCell.mergedFrom) {
           let merged = new Tile(positions.next, tile.value * 2);
-          merged.mergedFrom = [tile, next];
+          merged.mergedFrom = [tile, nextCell];
 
           self.grid.insertTile(merged);
           self.grid.removeTile(tile);
@@ -189,7 +187,6 @@ GameManager.prototype.move = function (direction) {
 
           // Update the score
           self.score += merged.value;
-          // The mighty 2048 tile
           if (merged.value === scoreGoal) self.won = true;
         } else {
           self.moveTile(tile, positions.farthest);
@@ -239,7 +236,6 @@ GameManager.prototype.buildTraversals = function (vector) {
   return traversals;
 };
 
-// TODO: maybe change name so it is more clear what it does
 GameManager.prototype.findFarthestPosition = function (cell, vector) {
   let previous;
 
@@ -252,8 +248,7 @@ GameManager.prototype.findFarthestPosition = function (cell, vector) {
 
   return {
     farthest: previous,
-    // Comment needed to explain variable, new name?
-    next: cell // Used to check if a merge is required
+    nextCell: cell
   };
 };
 

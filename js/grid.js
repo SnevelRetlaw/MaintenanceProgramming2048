@@ -1,10 +1,9 @@
 function Grid(size, previousState) {
   this.size = size;
-  this.cells = previousState ? this.fromState(previousState) : this.empty();
+  this.cells = previousState ? this.createGridFromState(previousState) : this.createEmptyGrid();
 }
-// Build a grid of the specified size
-// TODO change name to make it more clear
-Grid.prototype.empty = function () {
+
+Grid.prototype.createEmptyGrid = function () {
   let cells = [];
 
   for (let x = 0; x < this.size; x++) {
@@ -18,8 +17,7 @@ Grid.prototype.empty = function () {
   return cells;
 };
 
-// TODO change name to make it more clear
-Grid.prototype.fromState = function (state) {
+Grid.prototype.createGridFromState = function (state) {
   let cells = [];
 
   for (let x = 0; x < this.size; x++) {
@@ -34,14 +32,14 @@ Grid.prototype.fromState = function (state) {
   return cells;
 };
 
-// Find the first available random position
 // TODO what happens when cells.length is null/undefined?
 Grid.prototype.randomAvailableCell = function () {
   let cells = this.availableCells();
 
-  if (cells.length) {
-    return cells[Math.floor(Math.random() * cells.length)];
+  if (!cells.length) {
+    throw new Error('There is no free cell available')
   }
+  return cells[Math.floor(Math.random() * cells.length)];
 };
 
 // TODO check if callback is the best way to do this.

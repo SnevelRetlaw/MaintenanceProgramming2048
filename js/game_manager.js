@@ -16,7 +16,7 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager, scoreGoal
     this.updateGoal();
   });
 
-  this.setup();
+  this.setupGame();
 }
 
 const rangeInput = document.getElementById("rangeInput");
@@ -39,74 +39,57 @@ GameManager.prototype.updateGoal = function () {
   
   this.scoreGoal = tickValue;
   this.storageManager.clearGameState();
-  this.setup();
+  this.setupGame();
   
 };
 
-// TODO remove comment
 
-// Restart the game
 GameManager.prototype.restart = function () {
   this.storageManager.clearGameState();
   this.actuator.continueGame(); // Clear the game won/lost message
-  this.setup();
+  this.setupGame();
 };
 
-// Keep playing after winning (allows going over 2048)
 GameManager.prototype.keepPlaying = function () {
   this.keepPlaying = true;
   this.actuator.continueGame(); // Clear the game won/lost message
 };
 
 
-// TODO: remove comment
-// Return true if the game is lost, or has won and the user hasn't kept playing
 GameManager.prototype.isGameTerminated = function () {
-  return this.over || (this.won && !this.keepPlaying);
+  return this.gameOver || (this.won && !this.keepPlaying);
 };
 
-// TODO: remove comment (and change name to setupGame?)
-// Set up the game
-GameManager.prototype.setup = function () {
+GameManager.prototype.setupGame = function () {
   let previousState = this.storageManager.getGameState();
 
-  //TODO: remove comments
-  // Reload the game from a previous game if present
   if (previousState) {
     this.grid        = new Grid(previousState.grid.size,
                                 previousState.grid.cells); // Reload grid
     this.score       = previousState.score;
-    this.over        = previousState.over;
+    this.gameOver    = previousState.gameOver;
     this.won         = previousState.won;
     this.keepPlaying = previousState.keepPlaying;
   } else {
     this.grid        = new Grid(this.gridSize);
     this.score       = 0;
-    this.over        = false;
+    this.gameOver        = false;
     this.won         = false;
     this.keepPlaying = false;
 
-    // TODO: remove comment
-    // Add the initial tiles
     this.addStartTiles();
   }
 
-  // TODO: remove comment
-  // Update the actuator
   this.actuate();
 };
 
-// TODO: remove comment
-// Set up the initial tiles to start the game with
 GameManager.prototype.addStartTiles = function () {
   for (let i = 0; i < this.startTiles; i++) {
-    this.addRandomTile();
+    this.addTileToRandomPosition();
   }
 };
 
-// TODO reomve comment (and change name to addTileToRandomPosition?)
-// Adds a tile in a random position
-GameManager.prototype.addRandomTile = function () {
+GameManager.prototype.addTileToRandomPosition = function () {
   if (this.grid.cellsAvailable()) {
     let value = Math.random() < 0.9 ? 2 : 4;
     let tile = new Tile(this.grid.randomAvailableCell(), value);
@@ -124,7 +107,7 @@ GameManager.prototype.actuate = function () {
 
   // TODO: remove comment (and change this.over to this.lost/this.gameOver?)
   // Clear the state when the game is over (game over only, not win)
-  if (this.over) {
+  if (this.gameOver) {
     this.storageManager.clearGameState();
   } else {
     this.storageManager.setGameState(this.serialize());
@@ -132,7 +115,7 @@ GameManager.prototype.actuate = function () {
 
   this.actuator.actuate(this.grid, {
     score:      this.score,
-    over:       this.over,
+    gameOver:   this.gameOver,
     won:        this.won,
     bestScore:  this.storageManager.getBestScore(),
     terminated: this.isGameTerminated()
@@ -145,7 +128,7 @@ GameManager.prototype.serialize = function () {
   return {
     grid:        this.grid.serialize(),
     score:       this.score,
-    over:        this.over,
+    gameOver:    this.gameOver,
     won:         this.won,
     keepPlaying: this.keepPlaying
   };
@@ -233,10 +216,10 @@ GameManager.prototype.move = function (direction) {
   });
 
   if (moved) {
-    this.addRandomTile();
+    this.addTileToRandomPosition();
 
     if (!this.movesAvailable()) {
-      this.over = true; // Game over!
+      this.gameOver = true; // Game over!
     }
 
     this.actuate();

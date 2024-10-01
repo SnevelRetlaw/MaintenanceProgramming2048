@@ -35,18 +35,19 @@ KeyboardInputManager.prototype.listen = function () {
   let self = this;
 
   let map = {
-    38: 0, // Up
-    39: 1, // Right
-    40: 2, // Down
-    37: 3, // Left
-    75: 0, // Vim up
-    76: 1, // Vim right
-    74: 2, // Vim down
-    72: 3, // Vim left
-    87: 0, // W
-    68: 1, // D
-    83: 2, // S
-    65: 3  // A
+    "k": 0, // Vim up
+    "l": 1, // Vim right
+    "j": 2, // Vim down
+    "h": 3, // Vim left
+    "w": 0, // W
+    "d": 1, // D
+    "s": 2, // S
+    "a": 3,  // A
+    "ArrowUp": 0,
+    "ArrowRight": 1,
+    "ArrowDown": 2,
+    "ArrowLeft": 3,
+
   };
 
   // Respond to direction keys
@@ -63,7 +64,7 @@ KeyboardInputManager.prototype.listen = function () {
     }
 
     // R key restarts the game
-    if (!modifiers && event.key === 82) {
+    if (!modifiers && event.key === "r") {
       self.restart.call(self, event);
     }
   });

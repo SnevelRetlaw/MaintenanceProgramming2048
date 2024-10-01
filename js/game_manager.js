@@ -1,6 +1,6 @@
-function GameManager(size, InputManager, Actuator, StorageManager, scoreGoal) {
-  // TODO change name to gridSize
-  this.size           = size; // Size of the grid
+function GameManager(gridSize, InputManager, Actuator, StorageManager, scoreGoal) {
+
+  this.gridSize           = gridSize; // Size of the grid
   this.inputManager   = new InputManager;
   this.storageManager = new StorageManager;
   this.actuator       = new Actuator;
@@ -80,7 +80,7 @@ GameManager.prototype.setup = function () {
     this.won         = previousState.won;
     this.keepPlaying = previousState.keepPlaying;
   } else {
-    this.grid        = new Grid(this.size);
+    this.grid        = new Grid(this.gridSize);
     this.score       = 0;
     this.over        = false;
     this.won         = false;
@@ -262,7 +262,7 @@ GameManager.prototype.getVector = function (direction) {
 GameManager.prototype.buildTraversals = function (vector) {
   let traversals = { x: [], y: [] };
 
-  for (let pos = 0; pos < this.size; pos++) {
+  for (let pos = 0; pos < this.gridSize; pos++) {
     traversals.x.push(pos);
     traversals.y.push(pos);
   }
@@ -298,8 +298,8 @@ GameManager.prototype.movesAvailable = function () {
 
 // Check for available matches between tiles (more expensive check)
 GameManager.prototype.tileMatchesAvailable = function () {
-  for (let x = 0; x < this.size; x++) {
-    for (let y = 0; y < this.size; y++) {
+  for (let x = 0; x < this.gridSize; x++) {
+    for (let y = 0; y < this.gridSize; y++) {
       if (this.tilesMatch(x, y)) return true
     }
   }

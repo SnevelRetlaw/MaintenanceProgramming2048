@@ -34,7 +34,7 @@ KeyboardInputManager.prototype.emit = function (event, data) {
 KeyboardInputManager.prototype.listen = function () {
   let self = this;
 
-  let map = {
+  let keyMapping = {
     "k": 0, // Vim up
     "l": 1, // Vim right
     "j": 2, // Vim down
@@ -54,7 +54,7 @@ KeyboardInputManager.prototype.listen = function () {
   document.addEventListener("keydown", function (event) {
     let modifiers = event.altKey || event.ctrlKey || event.metaKey ||
                     event.shiftKey;
-    let mapped    = map[event.key];
+    let mapped    = keyMapping[event.key];
 
     if (!modifiers) {
       if (mapped !== undefined) {

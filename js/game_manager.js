@@ -176,14 +176,14 @@ GameManager.prototype.move = function (direction) {
         let nextCell      = self.grid.cellContent(positions.nextCell);
 
         if (nextCell && nextCell.value === tile.value && !nextCell.mergedFrom) {
-          let merged = new Tile(positions.next, tile.value * 2);
+          let merged = new Tile(positions.nextCell, tile.value * 2);
           merged.mergedFrom = [tile, nextCell];
 
           self.grid.insertTile(merged);
           self.grid.removeTile(tile);
 
           // Converge the two tiles' positions
-          tile.updatePosition(positions.next);
+          tile.updatePosition(positions.nextCell);
 
           // Update the score
           self.score += merged.value;

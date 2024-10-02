@@ -146,6 +146,11 @@ GameManager.prototype.moveTile = function (tile, cell) {
   tile.updatePosition(cell);
 };
 
+// TODO fill in 
+GameManager.prototype.mergeTile = function(){
+
+}
+
 // Move tiles on the grid in the specified direction
 GameManager.prototype.move = function (direction) {
   let self = this;
@@ -163,7 +168,7 @@ GameManager.prototype.move = function (direction) {
   traversals.x.forEach(function (x) {
     traversals.y.forEach(function (y) {
       cell = { x: x, y: y };
-      const hasMoved = self.gummiStiefel(cell, self, vector);
+      const hasMoved = self.mergeOrMoveTile(cell, self, vector);
       if (hasMoved){
         moved = true;
       }
@@ -181,7 +186,7 @@ GameManager.prototype.move = function (direction) {
   }
 };
 
-GameManager.prototype.gummiStiefel = function (cell, self, vector){
+GameManager.prototype.mergeOrMoveTile = function (cell, self, vector){
 
   tile = self.grid.cellContent(cell);
 
@@ -191,6 +196,7 @@ GameManager.prototype.gummiStiefel = function (cell, self, vector){
   let nextCell      = self.grid.cellContent(positions.nextCell);
 
   if (this.shouldBeMerged(tile, nextCell)) {
+    //TODO extract to a function "mergeTile"
     let merged = new Tile(positions.nextCell, tile.value * 2);
     merged.mergedFrom = [tile, nextCell];
 
@@ -207,10 +213,8 @@ GameManager.prototype.gummiStiefel = function (cell, self, vector){
     self.moveTile(tile, positions.farthest);
   }
 
-  if (!self.positionsEqual(cell, tile)) {
-    return true; // The tile moved from its original cell!
-  }
-
+  if (!self.positionsEqual(cell, tile)) return true; // The tile moved from its original cell!
+  
   return false;
 };
 

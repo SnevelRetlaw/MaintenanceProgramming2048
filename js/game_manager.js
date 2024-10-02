@@ -148,14 +148,9 @@ GameManager.prototype.moveTile = function (tile, cell) {
 
 // Move tiles on the grid in the specified direction
 GameManager.prototype.move = function (direction) {
-  let scoreGoal = this.scoreGoal;
   let self = this;
 
-  console.log(scoreGoal);
-
   if (this.isGameTerminated()) return;
-
-  let cell, tile;
 
   let vector     = this.getVector(direction);
   let traversals = this.buildTraversals(vector);
@@ -167,7 +162,8 @@ GameManager.prototype.move = function (direction) {
   // Traverse the grid in the right direction and move tiles
   traversals.x.forEach(function (x) {
     traversals.y.forEach(function (y) {
-      const hasMoved = self.gummiStiefel(x, y, self, vector, scoreGoal);
+      cell = { x: x, y: y };
+      const hasMoved = self.gummiStiefel(cell, self, vector);
       if (hasMoved){
         moved = true;
       }
@@ -185,8 +181,8 @@ GameManager.prototype.move = function (direction) {
   }
 };
 
-GameManager.prototype.gummiStiefel = function (x, y, self, vector, scoreGoal){
-  cell = { x: x, y: y };
+GameManager.prototype.gummiStiefel = function (cell, self, vector){
+
   tile = self.grid.cellContent(cell);
 
   if (!tile) return;
@@ -206,7 +202,7 @@ GameManager.prototype.gummiStiefel = function (x, y, self, vector, scoreGoal){
 
     // Update the score
     self.score += merged.value;
-    if (merged.value === scoreGoal) self.won = true;
+    if (merged.value === this.scoreGoal) self.won = true;
   } else {
     self.moveTile(tile, positions.farthest);
   }

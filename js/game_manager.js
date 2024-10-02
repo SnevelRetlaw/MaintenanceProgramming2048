@@ -167,34 +167,9 @@ GameManager.prototype.move = function (direction) {
   // Traverse the grid in the right direction and move tiles
   traversals.x.forEach(function (x) {
     traversals.y.forEach(function (y) {
-      cell = { x: x, y: y };
-      tile = self.grid.cellContent(cell);
-
-
-      if (tile) {
-        let positions = self.findFarthestPosition(cell, vector);
-        let nextCell      = self.grid.cellContent(positions.nextCell);
-
-        if (nextCell && nextCell.value === tile.value && !nextCell.mergedFrom) {
-          let merged = new Tile(positions.nextCell, tile.value * 2);
-          merged.mergedFrom = [tile, nextCell];
-
-          self.grid.insertTile(merged);
-          self.grid.removeTile(tile);
-
-          // Converge the two tiles' positions
-          tile.updatePosition(positions.nextCell);
-
-          // Update the score
-          self.score += merged.value;
-          if (merged.value === scoreGoal) self.won = true;
-        } else {
-          self.moveTile(tile, positions.farthest);
-        }
-
-        if (!self.positionsEqual(cell, tile)) {
-          moved = true; // The tile moved from its original cell!
-        }
+      const hasMoved = this.gummiStiefel(x, y);
+      if (hasMoved){
+        moved = true;
       }
     });
   });
@@ -209,6 +184,39 @@ GameManager.prototype.move = function (direction) {
     this.actuate();
   }
 };
+
+GameManager.prototype.gummiStiefel = function (x, y){
+  cell = { x: x, y: y };
+  tile = self.grid.cellContent(cell);
+
+  if (tile) {
+    let positions = self.findFarthestPosition(cell, vector);
+    let nextCell      = self.grid.cellContent(positions.nextCell);
+
+    if (nextCell && nextCell.value === tile.value && !nextCell.mergedFrom) {
+      let merged = new Tile(positions.nextCell, tile.value * 2);
+      merged.mergedFrom = [tile, nextCell];
+
+      self.grid.insertTile(merged);
+      self.grid.removeTile(tile);
+
+      // Converge the two tiles' positions
+      tile.updatePosition(positions.nextCell);
+
+      // Update the score
+      self.score += merged.value;
+      if (merged.value === scoreGoal) self.won = true;
+    } else {
+      self.moveTile(tile, positions.farthest);
+    }
+
+    if (!self.positionsEqual(cell, tile)) {
+      return true; // The tile moved from its original cell!
+    }
+
+    return false;
+  }
+}
 
 GameManager.prototype.getVector = function (direction) {
   let map = {

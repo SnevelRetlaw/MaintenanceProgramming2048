@@ -146,20 +146,20 @@ GameManager.prototype.moveTile = function (tile, cell) {
   tile.updatePosition(cell);
 };
 
-// TODO fill in 
-GameManager.prototype.mergeTile = function(self, tile, positions, nextCell){
-  let merged = new Tile(positions.nextCell, tile.value * 2);
-  merged.mergedFrom = [tile, nextCell];
+// TODO improve arguments (amount and names)
+GameManager.prototype.mergeTile = function(self, tile, nextCellPosition, nextCellContent){
+  let mergedTile = new Tile(nextCellPosition, tile.value * 2);
+  mergedTile.mergedFrom = [tile, nextCellContent];
 
-  self.grid.insertTile(merged);
+  self.grid.insertTile(mergedTile);
   self.grid.removeTile(tile);
 
   // Converge the two tiles' positions
-  tile.updatePosition(positions.nextCell);
+  tile.updatePosition(nextCellPosition);
 
   // Update the score
-  self.score += merged.value;
-  if (merged.value === this.scoreGoal) self.won = true;
+  self.score += mergedTile.value;
+  if (mergedTile.value === this.scoreGoal) self.won = true;
 }
 
 // Move tiles on the grid in the specified direction
@@ -203,17 +203,16 @@ GameManager.prototype.mergeOrMoveTile = function (cell, self, vector){
 
   if (!tile) return;
   
-  let positions = self.findFarthestPosition(cell, vector);
-  let nextCell      = self.grid.cellContent(positions.nextCell);
+  let positions        = self.findFarthestPosition(cell, vector);
+  let nextCellContent  = self.grid.cellContent(positions.nextCell);
 
-  if (this.shouldBeMerged(tile, nextCell)) {
-    //TODO extract to a function "mergeTile"
-    self.mergeTile(self, tile, positions, nextCell)
+  if (self.shouldBeMerged(tile, nextCellContent)) {
+    self.mergeTile(self, tile, positions.nextCell, nextCellContent)
   } else {
     self.moveTile(tile, positions.farthest);
   }
 
-  if (!self.positionsEqual(cell, tile)) return true; // The tile moved from its original cell!
+  if (!self.positionsEqual(cell, tile)) return true;
   
   return false;
 };

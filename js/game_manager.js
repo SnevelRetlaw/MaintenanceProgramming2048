@@ -147,8 +147,19 @@ GameManager.prototype.moveTile = function (tile, cell) {
 };
 
 // TODO fill in 
-GameManager.prototype.mergeTile = function(){
+GameManager.prototype.mergeTile = function(self, tile, positions, nextCell){
+  let merged = new Tile(positions.nextCell, tile.value * 2);
+  merged.mergedFrom = [tile, nextCell];
 
+  self.grid.insertTile(merged);
+  self.grid.removeTile(tile);
+
+  // Converge the two tiles' positions
+  tile.updatePosition(positions.nextCell);
+
+  // Update the score
+  self.score += merged.value;
+  if (merged.value === this.scoreGoal) self.won = true;
 }
 
 // Move tiles on the grid in the specified direction
@@ -197,18 +208,7 @@ GameManager.prototype.mergeOrMoveTile = function (cell, self, vector){
 
   if (this.shouldBeMerged(tile, nextCell)) {
     //TODO extract to a function "mergeTile"
-    let merged = new Tile(positions.nextCell, tile.value * 2);
-    merged.mergedFrom = [tile, nextCell];
-
-    self.grid.insertTile(merged);
-    self.grid.removeTile(tile);
-
-    // Converge the two tiles' positions
-    tile.updatePosition(positions.nextCell);
-
-    // Update the score
-    self.score += merged.value;
-    if (merged.value === this.scoreGoal) self.won = true;
+    self.mergeTile(self, tile, positions, nextCell)
   } else {
     self.moveTile(tile, positions.farthest);
   }

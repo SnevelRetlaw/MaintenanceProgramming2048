@@ -146,15 +146,14 @@ GameManager.prototype.moveTile = function (tile, cell) {
   tile.updatePosition(cell);
 };
 
-// TODO improve arguments (amount and names)
-GameManager.prototype.mergeTile = function(self, oldTile, nextCellPosition, nextCellContent){
-  let mergedTile = new Tile(nextCellPosition, oldTile.value * 2);
-  mergedTile.mergedFrom = [oldTile, nextCellContent];
+GameManager.prototype.mergeTile = function(self, movingTile, stationaryTilePosition, stationaryTileContent){
+  let mergedTile = new Tile(stationaryTilePosition, movingTile.value * 2);
+  mergedTile.mergedFrom = [movingTile, stationaryTileContent];
 
   self.grid.insertTile(mergedTile);
-  self.grid.removeTile(oldTile);
+  self.grid.removeTile(movingTile);
 
-  oldTile.updatePosition(nextCellPosition);
+  movingTile.updatePosition(stationaryTilePosition);
 
   self.score += mergedTile.value;
   if (mergedTile.value === this.scoreGoal) self.won = true;
@@ -199,13 +198,13 @@ GameManager.prototype.mergeOrMoveTile = function (cell, self, vector){
 
   if (!tile) return;
   
-  let positions        = self.findFarthestPosition(cell, vector);
-  let nextCellContent  = self.grid.cellContent(positions.nextCell);
+  let farthestCells        = self.findFarthestFreeAndOccupiedCell(cell, vector);
+  let nextOccupiedCellContent  = self.grid.cellContent(farthestCells.occupied);
 
-  if (self.shouldBeMerged(tile, nextCellContent)) {
-    self.mergeTile(self, tile, positions.nextCell, nextCellContent)
+  if (self.shouldBeMerged(tile, nextOccupiedCellContent)) {
+    self.mergeTile(self, tile, farthestCells.occupied, nextOccupiedCellContent)
   } else {
-    self.moveTile(tile, positions.farthest);
+    self.moveTile(tile, farthestCells.free);
   }
 
   if (!self.positionsEqual(cell, tile)) return true;
@@ -244,7 +243,7 @@ GameManager.prototype.buildTraversals = function (vector) {
 };
 
 //TODO; find better name
-GameManager.prototype.findFarthestPosition = function (cell, vector) {
+GameManager.prototype.findFarthestFreeAndOccupiedCell = function (cell, vector) {
   let previous;
 
   // Progress towards the vector direction until an obstacle is found
@@ -255,8 +254,8 @@ GameManager.prototype.findFarthestPosition = function (cell, vector) {
            this.grid.cellAvailable(cell));
 
   return {
-    farthest: previous,
-    nextCell: cell
+    free: previous,
+    occupied: cell
   };
 };
 

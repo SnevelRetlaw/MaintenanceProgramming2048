@@ -242,7 +242,6 @@ GameManager.prototype.buildTraversals = function (vector) {
   return traversals;
 };
 
-//TODO; find better name
 GameManager.prototype.findFarthestFreeAndOccupiedCell = function (cell, vector) {
   let previous;
 
@@ -263,7 +262,6 @@ GameManager.prototype.movesAvailable = function () {
   return this.grid.cellsAvailable() || this.tileMatchesAvailable();
 };
 
-// Check for available matches between tiles (more expensive check)
 GameManager.prototype.tileMatchesAvailable = function () {
   for (let x = 0; x < this.gridSize; x++) {
     for (let y = 0; y < this.gridSize; y++) {

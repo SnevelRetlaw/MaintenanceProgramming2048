@@ -207,9 +207,9 @@ GameManager.prototype.mergeOrMoveTile = function (cell, self, vector){
     self.moveTile(tile, farthestCells.free);
   }
 
-  if (!self.positionsEqual(cell, tile)) return true;
+  if (self.positionsEqual(cell, tile)) return false;
   
-  return false;
+  return true;
 };
 
 GameManager.prototype.shouldBeMerged = function (tile, nextCell){

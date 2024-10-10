@@ -147,17 +147,15 @@ GameManager.prototype.moveTile = function (tile, cell) {
 };
 
 // TODO improve arguments (amount and names)
-GameManager.prototype.mergeTile = function(self, tile, nextCellPosition, nextCellContent){
-  let mergedTile = new Tile(nextCellPosition, tile.value * 2);
-  mergedTile.mergedFrom = [tile, nextCellContent];
+GameManager.prototype.mergeTile = function(self, oldTile, nextCellPosition, nextCellContent){
+  let mergedTile = new Tile(nextCellPosition, oldTile.value * 2);
+  mergedTile.mergedFrom = [oldTile, nextCellContent];
 
   self.grid.insertTile(mergedTile);
-  self.grid.removeTile(tile);
+  self.grid.removeTile(oldTile);
 
-  // Converge the two tiles' positions
-  tile.updatePosition(nextCellPosition);
+  oldTile.updatePosition(nextCellPosition);
 
-  // Update the score
   self.score += mergedTile.value;
   if (mergedTile.value === this.scoreGoal) self.won = true;
 }
@@ -170,27 +168,25 @@ GameManager.prototype.move = function (direction) {
 
   let vector     = this.getVector(direction);
   let traversals = this.buildTraversals(vector);
-  let moved      = false;
+  let gridMoved  = false;
 
   this.prepareTiles();
 
-  // TODO: extract to separate function + remove comments
-  // Traverse the grid in the right direction and move tiles
   traversals.x.forEach(function (x) {
     traversals.y.forEach(function (y) {
       cell = { x: x, y: y };
-      const hasMoved = self.mergeOrMoveTile(cell, self, vector);
-      if (hasMoved){
-        moved = true;
+      const tileHasMoved = self.mergeOrMoveTile(cell, self, vector);
+      if (tileHasMoved){
+        gridMoved = true;
       }
     });
   });
 
-  if (moved) {
+  if (gridMoved) {
     this.addTileToRandomPosition();
 
     if (!this.movesAvailable()) {
-      this.gameOver = true; // Game over!
+      this.gameOver = true;
     }
 
     this.actuate();
@@ -247,6 +243,7 @@ GameManager.prototype.buildTraversals = function (vector) {
   return traversals;
 };
 
+//TODO; find better name
 GameManager.prototype.findFarthestPosition = function (cell, vector) {
   let previous;
 

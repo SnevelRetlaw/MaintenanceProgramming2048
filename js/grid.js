@@ -1,17 +1,15 @@
 function Grid(size, previousState) {
   this.size = size;
-  this.cells = previousState ? this.fromState(previousState) : this.empty();
+  this.cells = previousState ? this.createGridFromState(previousState) : this.createEmptyGrid();
 }
-module.exports = Grid;
-// Build a grid of the specified size
-// TODO change name to make it more clear
-Grid.prototype.empty = function () {
-  var cells = [];
 
-  for (var x = 0; x < this.size; x++) {
-    var row = cells[x] = [];
+Grid.prototype.createEmptyGrid = function () {
+  let cells = [];
 
-    for (var y = 0; y < this.size; y++) {
+  for (let x = 0; x < this.size; x++) {
+    let row = cells[x] = [];
+
+    for (let y = 0; y < this.size; y++) {
       row.push(null);
     }
   }
@@ -19,15 +17,14 @@ Grid.prototype.empty = function () {
   return cells;
 };
 
-// TODO change name to make it more clear
-Grid.prototype.fromState = function (state) {
-  var cells = [];
+Grid.prototype.createGridFromState = function (state) {
+  let cells = [];
 
-  for (var x = 0; x < this.size; x++) {
-    var row = cells[x] = [];
+  for (let x = 0; x < this.size; x++) {
+    let row = cells[x] = [];
 
-    for (var y = 0; y < this.size; y++) {
-      var tile = state[x][y];
+    for (let y = 0; y < this.size; y++) {
+      let tile = state[x][y];
       row.push(tile ? new Tile(tile.position, tile.value) : null);
     }
   }
@@ -35,19 +32,17 @@ Grid.prototype.fromState = function (state) {
   return cells;
 };
 
-// Find the first available random position
-// TODO what happens when cells.length is null/undefined?
 Grid.prototype.randomAvailableCell = function () {
-  var cells = this.availableCells();
+  let cells = this.availableCells();
 
-  if (cells.length) {
-    return cells[Math.floor(Math.random() * cells.length)];
+  if (!cells.length) {
+    throw new Error('There is no free cell available')
   }
+  return cells[Math.floor(Math.random() * cells.length)];
 };
 
-// TODO check if callback is the best way to do this.
 Grid.prototype.availableCells = function () {
-  var cells = [];
+  let cells = [];
 
   this.eachCell(function (x, y, tile) {
     if (!tile) {
@@ -60,25 +55,22 @@ Grid.prototype.availableCells = function () {
 
 // Call callback for every cell
 Grid.prototype.eachCell = function (callback) {
-  for (var x = 0; x < this.size; x++) {
-    for (var y = 0; y < this.size; y++) {
+  for (let x = 0; x < this.size; x++) {
+    for (let y = 0; y < this.size; y++) {
       callback(x, y, this.cells[x][y]);
     }
   }
 };
 
-// Check if there are any cells available
-// TODO: feels like using length here is a bit of a hack, as well as !!
+
 Grid.prototype.cellsAvailable = function () {
   return !!this.availableCells().length;
 };
 
-// Check if the specified cell is taken
 Grid.prototype.cellAvailable = function (cell) {
   return !this.cellOccupied(cell);
 };
 
-// TODO: using cellContent for this seems like a hack
 Grid.prototype.cellOccupied = function (cell) {
   return !!this.cellContent(cell);
 };
@@ -91,7 +83,6 @@ Grid.prototype.cellContent = function (cell) {
   }
 };
 
-// Inserts a tile at its position
 Grid.prototype.insertTile = function (tile) {
   this.cells[tile.x][tile.y] = tile;
 };
@@ -105,14 +96,13 @@ Grid.prototype.withinBounds = function (position) {
          position.y >= 0 && position.y < this.size;
 };
 
-// TODO: Not sure what this is for...
 Grid.prototype.serialize = function () {
-  var cellState = [];
+  let cellState = [];
 
-  for (var x = 0; x < this.size; x++) {
-    var row = cellState[x] = [];
+  for (let x = 0; x < this.size; x++) {
+    let row = cellState[x] = [];
 
-    for (var y = 0; y < this.size; y++) {
+    for (let y = 0; y < this.size; y++) {
       row.push(this.cells[x][y] ? this.cells[x][y].serialize() : null);
     }
   }

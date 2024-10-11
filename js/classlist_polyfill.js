@@ -1,10 +1,19 @@
+/*
+Polyfill: classList
+Compatible for:
+Chrome below 22
+Edge below v16
+Firefox below v3.6
+*/
+
+
 (function () {
   if (typeof window.Element === "undefined" ||
       "classList" in document.documentElement) {
     return;
   }
 
-  var prototype = Array.prototype,
+  let prototype = Array.prototype,
       push = prototype.push,
       splice = prototype.splice,
       join = prototype.join;
@@ -13,9 +22,9 @@
     this.el = el;
     // The className needs to be trimmed and split on whitespace
     // to retrieve a list of classes.
-    var classes = el.className.replace(/^\s+|\s+$/g, '').split(/\s+/);
-    for (var i = 0; i < classes.length; i++) {
-      push.call(this, classes[i]);
+    let classes = el.className.replace(/(^\s+)|(\s+$)/g, '').split(/\s+/);
+    for (const element of classes) {
+      push.call(this, classes[element]);
     }
   }
 
@@ -33,7 +42,8 @@
     },
     remove: function (token) {
       if (!this.contains(token)) return;
-      for (var i = 0; i < this.length; i++) {
+      let i = 0
+      for (i; i < this.length; i++) {
         if (this[i] == token) break;
       }
       splice.call(this, i, 1);

@@ -1,12 +1,13 @@
-const GameManager = require('../js/game_manager.js');
-const Grid = require('../js/grid.js');
-const Tile = require('../js/tile.js');
 
+const GameManager = require('../js/game_manager.js');
+const Tile = require('../js/tile.js');
+const Grid = require('../js/grid.js');
 describe('GameManager', () => {
     let gameManager;
     let mockInputManager;
     let mockActuator;
     let mockStorageManager;
+
 
     beforeEach(() => {
       
@@ -26,11 +27,8 @@ describe('GameManager', () => {
             getBestScore: jest.fn(() => 0),
             setBestScore: jest.fn(),
         }));
-
+        
         gameManager = new GameManager(4, mockInputManager, mockActuator, mockStorageManager);
-        // gameManager.grid = new Grid(4); 
-        // gameManager.score = 0; 
-        // gameManager.over = false; 
     });
 
     describe('Automatic Initialization', () => {
@@ -57,13 +55,7 @@ describe('GameManager', () => {
             expect(gameManager.setup).toHaveBeenCalled();
         });
 
-        //error
-        // test('keepPlaying should set keepPlaying to true and clear the game message', () => {
-        //     gameManager.keepPlaying();
     
-        //     expect(gameManager.keepPlaying).toBe(true);
-        //     expect(mockActuator.mock.results[0].value.continueGame).toHaveBeenCalled();
-        // });
 
     
         test('isGameTerminated should return true if game is over or won without keepPlaying', () => {
@@ -79,11 +71,11 @@ describe('GameManager', () => {
             expect(gameManager.isGameTerminated()).toBe(false);
         });
 
-        // test('setup should add start tiles when no previous state exists', () => {
-        //   gameManager.setup();
-        //   mockStorageManager.mock.results[0].value.clearGameState
-        //   expect(mockGrid).toHaveBeenCalledTimes(1);
-        // });
+        test('should set up with 2 tiles', () => {
+            gameManager.setup();
+            const tileCount = gameManager.grid.cells.flat().filter(cell => cell !== null).length;
+            expect(tileCount).toBe(2);             
+        });
     });
 
     describe('Move Functionality', () => {
@@ -91,8 +83,19 @@ describe('GameManager', () => {
             gameManager = new GameManager(4, mockInputManager, mockActuator, mockStorageManager);
             gameManager.grid = new Grid(4);
             gameManager.score = 0;
-            // gameManager.over = false;
         });
+
+        test('should not add random tile if game is over', () => {
+            gameManager.over = true; 
+         
+            const addRandomTileMock = jest.spyOn(gameManager, 'addRandomTile');  
+
+            gameManager.move(0); 
+               
+            expect(addRandomTileMock).not.toHaveBeenCalled();
+        });
+        
+
         test('should not move if game is over', () => {
             gameManager.over = true; 
 
@@ -114,19 +117,19 @@ describe('GameManager', () => {
             expect(gameManager.grid.cellContent({ x: 0, y: 0 }).value).toBe(4); 
             expect(gameManager.grid.cellContent({ x: 0, y: 1 })).toBeNull(); 
         });
-        //error
-        // test('should add random tile after move', () => {
-            
-        //     gameManager.grid.insertTile(new Tile({ x: 0, y: 0 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 1, y: 0 }, 2));
-
-        //     // Mock addRandomTile
-        //     gameManager.addRandomTile = jest.fn();
-
-        //     gameManager.move(0); 
-
-        //     expect(gameManager.addRandomTile).toHaveBeenCalled(); 
-        // });
+       
+        test('should add random tile if there are moves available', () => {
+            gameManager.grid.insertTile(new Tile({ x: 0, y: 0 }, 2));
+            gameManager.grid.insertTile(new Tile({ x: 1, y: 0 }, 2));
+    
+            const addRandomTileMock = jest.spyOn(gameManager, 'addRandomTile');
+            gameManager.movesAvailable = jest.fn(() => true); 
+    
+            gameManager.move(0); 
+    
+            expect(addRandomTileMock).toHaveBeenCalled(); 
+        });
+        
     
         // test('should end the game if no moves available', () => {
             
@@ -155,20 +158,6 @@ describe('GameManager', () => {
 
         //     expect(gameManager.over).toBe(true); 
         // });
-        // test('move should call prepareTiles and moveTile', () => {
-        //     // Mocking internal methods to track calls
-        //     gameManager.prepareTiles = jest.fn();
-        //     gameManager.moveTile = jest.fn();
-        //     gameManager.addRandomTile = jest.fn();
-        //     gameManager.movesAvailable = jest.fn(() => true);
-        //     gameManager.grid.insertTile(new Tile({ x: 0, y: 0 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 0, y: 1 }, 4));
-
-        //     gameManager.move(2); 
-
-        //     expect(gameManager.prepareTiles).toHaveBeenCalled();
-        //     expect(gameManager.addRandomTile).toHaveBeenCalled();
-        //     expect(gameManager.moveTile).toHaveBeenCalled();
-        // });
+        
     });
 });

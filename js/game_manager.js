@@ -1,3 +1,6 @@
+const Grid = require('./grid');
+const Tile = require('./tile');
+
 function GameManager(gridSize, InputManager, Actuator, StorageManager, scoreGoal) {
 
   this.gridSize           = gridSize; // Size of the grid
@@ -18,6 +21,7 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager, scoreGoal
 
   this.setupGame();
 }
+module.exports = GameManager;
 
 const rangeInput = document.getElementById("rangeInput");
 const rangeValueDisplay = document.getElementById("rangeValue");

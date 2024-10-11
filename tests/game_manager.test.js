@@ -27,14 +27,19 @@ describe('GameManager', () => {
             getBestScore: jest.fn(() => 0),
             setBestScore: jest.fn(),
         }));
+
+        mockScoreGoal = jest.fn().mockImplementation(() => ({
+            getScoreGoal: jest.fn(() => 2048),
+        }));
         
-        gameManager = new GameManager(4, mockInputManager, mockActuator, mockStorageManager);
+        gameManager = new GameManager(4, mockInputManager, mockActuator, mockStorageManager,2048);
     });
 
     describe('Automatic Initialization', () => {
         test('should initialize the game correctly', () => {
-            expect(gameManager.size).toBe(4);
+            expect(gameManager.gridSize).toBe(4);
             expect(gameManager.startTiles).toBe(2);
+            expect(gameManager.scoreGoal).toBe(2048);
             expect(mockInputManager).toHaveBeenCalledTimes(1);
             expect(mockActuator).toHaveBeenCalledTimes(1);
             expect(mockStorageManager).toHaveBeenCalledTimes(1);
@@ -45,24 +50,24 @@ describe('GameManager', () => {
     describe('Game Control', () => {
         beforeEach(() => {
             // Mock setup method to track its calls
-            gameManager.setup = jest.fn();
+            gameManager.setupGame = jest.fn();
         });
         test('restart should clear game state and setup the game', () => {
             gameManager.restart();
 
             expect(mockStorageManager.mock.results[0].value.clearGameState).toHaveBeenCalledTimes(1);
             expect(mockActuator.mock.results[0].value.continueGame).toHaveBeenCalledTimes(1);
-            expect(gameManager.setup).toHaveBeenCalled();
+            expect(gameManager.setupGame).toHaveBeenCalled();
         });
 
     
 
     
         test('isGameTerminated should return true if game is over or won without keepPlaying', () => {
-            gameManager.over = true;
+            gameManager.gameOver = true;
             expect(gameManager.isGameTerminated()).toBe(true);
 
-            gameManager.over = false;
+            gameManager.gameOver = false;
             gameManager.won = true;
             gameManager.keepPlaying = false;
             expect(gameManager.isGameTerminated()).toBe(true);
@@ -72,7 +77,7 @@ describe('GameManager', () => {
         });
 
         test('should set up with 2 tiles', () => {
-            gameManager.setup();
+            gameManager.setupGame();
             const tileCount = gameManager.grid.cells.flat().filter(cell => cell !== null).length;
             expect(tileCount).toBe(2);             
         });
@@ -86,9 +91,9 @@ describe('GameManager', () => {
         });
 
         test('should not add random tile if game is over', () => {
-            gameManager.over = true; 
+            gameManager.gameOver = true; 
          
-            const addRandomTileMock = jest.spyOn(gameManager, 'addRandomTile');  
+            const addRandomTileMock = jest.spyOn(gameManager, 'addTileToRandomPosition');  
 
             gameManager.move(0); 
                
@@ -97,7 +102,7 @@ describe('GameManager', () => {
         
 
         test('should not move if game is over', () => {
-            gameManager.over = true; 
+            gameManager.gameOver = true; 
 
             gameManager.move(0); 
 
@@ -122,7 +127,7 @@ describe('GameManager', () => {
             gameManager.grid.insertTile(new Tile({ x: 0, y: 0 }, 2));
             gameManager.grid.insertTile(new Tile({ x: 1, y: 0 }, 2));
     
-            const addRandomTileMock = jest.spyOn(gameManager, 'addRandomTile');
+            const addRandomTileMock = jest.spyOn(gameManager, 'addTileToRandomPosition');
             gameManager.movesAvailable = jest.fn(() => true); 
     
             gameManager.move(0); 

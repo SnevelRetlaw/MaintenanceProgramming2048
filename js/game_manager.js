@@ -20,16 +20,27 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager, scoreGoal
   });
 
   this.setupGame();
+
+  this.setupDOM();
+  
+  this.setupGame();
 }
 module.exports = GameManager;
 
-const rangeInput = document.getElementById("rangeInput");
-const rangeValueDisplay = document.getElementById("rangeValue");
-const introDisplay = document.getElementById("intro");
+GameManager.prototype.setupDOM = function () {
+  const rangeInput = document.getElementById("rangeInput");
+  const rangeValueDisplay = document.getElementById("rangeValue");
+  const introDisplay = document.getElementById("intro");
 
-// Default Values
-rangeInput.value = 4;
-rangeValueDisplay.textContent = 2048;
+  
+  rangeInput.value = 4;
+  rangeValueDisplay.textContent = 2048;
+
+  
+  rangeInput.addEventListener("input", () => {
+    this.updateGoal();
+  });
+};
 
 // Update the tile target
 GameManager.prototype.updateGoal = function () {

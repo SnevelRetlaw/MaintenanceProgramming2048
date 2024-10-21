@@ -61,6 +61,9 @@ GameManager.prototype.isGameTerminated = function () {
 };
 
 GameManager.prototype.setupGame = function () {
+
+
+  this.addTileContainers()
   let previousState = this.storageManager.getGameState();
 
   if (previousState) {
@@ -81,6 +84,46 @@ GameManager.prototype.setupGame = function () {
   }
 
   this.actuate();
+};
+
+
+
+GameManager.prototype.addTiles = function (gridSize) {
+  var container = document.getElementById("grid-container");
+
+  for (var i = 0; i < gridSize; i++) {
+    var row = document.createElement('div');
+    row.setAttribute('class', 'grid-row'); // fix: row instead of content
+
+    for (var j = 0; j < gridSize; j++) { // fix: j++, not i++
+      var content = document.createElement('div');
+      content.setAttribute('class', 'grid-cell');
+      row.appendChild(content);
+    }
+
+    container.appendChild(row);
+  }
+
+};
+
+
+
+GameManager.prototype.addTileContainers = function (gridSize) {
+  var container = document.getElementById("grid-container");
+
+  for (var i = 0; i < gridSize; i++) {
+    var row = document.createElement('div');
+    row.setAttribute('class', 'grid-row'); // fix: row instead of content
+
+    for (var j = 0; j < gridSize; j++) { // fix: j++, not i++
+      var content = document.createElement('div');
+      content.setAttribute('class', 'grid-cell');
+      row.appendChild(content);
+    }
+
+    container.appendChild(row);
+  }
+
 };
 
 GameManager.prototype.addStartTiles = function () {

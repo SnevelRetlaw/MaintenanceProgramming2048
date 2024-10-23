@@ -18,9 +18,16 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager) {
   this.rangeValueDisplay = document.getElementById("rangeValue");
   this.introDisplay = document.getElementById("intro");
 
-  const speedrangeInput = document.getElementById("speedRangeInput"); // Corrected ID for speed input
-  const speedrangeValueDisplay = document.getElementById("speedRangeValue");
-  const speedintroDisplay = document.getElementById("speedIntro");
+  this.speedrangeInput = document.getElementById("speedRangeInput"); // Corrected ID for speed input
+  this.speedrangeValueDisplay = document.getElementById("speedRangeValue");
+  this.speedintroDisplay = document.getElementById("speedIntro");
+  // Default Values
+  this.speedrangeInput.value = 3;
+  this.speedrangeValueDisplay.textContent = "Default";
+  
+  // Default Values
+  this.rangeInput.value = 4;
+  this.rangeValueDisplay.textContent = 2048;
 
   // Default Values
   this.rangeInput.value = 4;
@@ -30,20 +37,13 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager) {
     this.updateGoal();
   });
 
-  speedrangeInput.addEventListener("input", () => {
+  this.speedrangeInput.addEventListener("input", () => {
     this.updateSpeed();
   });
   this.setupGame();
 }
 
 
-// Default Values
-speedrangeInput.value = 3;
-speedrangeValueDisplay.textContent = "Default";
-
-// Default Values
-rangeInput.value = 4;
-rangeValueDisplay.textContent = 2048;
 
 // Update the tile target
 GameManager.prototype.updateGoal = function () {

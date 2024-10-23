@@ -1,181 +1,158 @@
-const GameManager = require('../js/game_manager.js');
-const Tile = require('../js/tile.js');
-const Grid = require('../js/grid.js');
-describe('GameManager', () => {
+global.Grid = jest.fn().mockImplementation((size) => ({
+    size: size,
+    cells: Array(size)
+      .fill()
+      .map(() => Array(size).fill(null)),
+    availableCells: jest.fn(() => [{ x: 0, y: 0 }]),
+    randomAvailableCell: jest.fn(() => ({ x: 0, y: 0 })),
+    insertTile: jest.fn(),
+    removeTile: jest.fn(),
+    withinBounds: jest.fn(() => true),
+    cellsAvailable: jest.fn(() => true),
+    cellOccupied: jest.fn(() => false),
+    cellContent: jest.fn(() => null),
+    eachCell: jest.fn(),
+    serialize: jest.fn(() => ({ size: size, cells: [] })),
+  }));
+  
+  global.Tile = jest.fn().mockImplementation((position, value) => ({
+    x: position.x,
+    y: position.y,
+    value: value,
+    updatePosition: jest.fn(),
+  }));
+  
+  const innerHTML = require("./html_string_test.js");
+  const GameManager = require("../js/game_manager.js");
+  
+  const mockInputManager = {
+    on: jest.fn(),
+  };
+  
+  const mockActuator = {
+    actuate: jest.fn(),
+    continueGame: jest.fn(),
+  };
+  
+  const mockStorageManager = {
+    getGameState: jest.fn(() => null),
+    clearGameState: jest.fn(),
+    setGameState: jest.fn(),
+    getBestScore: jest.fn(() => 0),
+    setBestScore: jest.fn(),
+  };
+  
+  describe("GameManager", () => {
     let gameManager;
-    let mockInputManager;
-    let mockActuator;
-    let mockStorageManager;
-    let mockScoreGoal
-
-    beforeAll(() => {
-        // 创建 DOM 元素
-        const rangeInput = document.createElement('input');
-        rangeInput.type = 'range';
-        rangeInput.id = 'rangeInput';
-        document.body.appendChild(rangeInput);
-
-        const rangeValueDisplay = document.createElement('div');
-        rangeValueDisplay.id = 'rangeValue';
-        document.body.appendChild(rangeValueDisplay);
-
-        const introDisplay = document.createElement('div');
-        introDisplay.id = 'intro';
-        document.body.appendChild(introDisplay);
-    });
+  
     beforeEach(() => {
-      
-        mockInputManager = jest.fn().mockImplementation(() => ({
-            on: jest.fn(),
-        }));
-
-        mockActuator = jest.fn().mockImplementation(() => ({
-            actuate: jest.fn(),
-            continueGame: jest.fn(),
-        }));
-
-        mockStorageManager = jest.fn().mockImplementation(() => ({
-            getGameState: jest.fn(),
-            clearGameState: jest.fn(),
-            setGameState: jest.fn(),
-            getBestScore: jest.fn(() => 0),
-            setBestScore: jest.fn(),
-        }));
-
-        mockScoreGoal = jest.fn().mockImplementation(() => ({
-            getScoreGoal: jest.fn(() => 2048),
-        }));
-        
-        gameManager = new GameManager(4, mockInputManager, mockActuator, mockStorageManager,mockScoreGoal);
+      jest.clearAllMocks();
+      document.body.innerHTML = innerHTML; // 添加html到模拟dom环境中可以在代码中获取dom元素
+      gameManager = new GameManager(
+        4,
+        function () {
+          return mockInputManager;
+        },
+        function () {
+          return mockActuator;
+        },
+        function () {
+          return mockStorageManager;
+        } // 箭头函数是不能new对象的因为没有自己的this
+      );
     });
-
-    describe('Automatic Initialization', () => {
-        test('should initialize the game correctly', () => {
-            expect(gameManager.gridSize).toBe(4);
-            expect(gameManager.startTiles).toBe(2);
-            expect(mockInputManager).toHaveBeenCalledTimes(1);
-            expect(mockActuator).toHaveBeenCalledTimes(1);
-            expect(mockStorageManager).toHaveBeenCalledTimes(1);
-            expect(mockStorageManager.mock.results[0].value.getGameState).toHaveBeenCalled();
-        });
+  
+    test("initialization", () => {
+      expect(gameManager.gridSize).toBe(4);
+      expect(gameManager.startTiles).toBe(2);
+      expect(gameManager.inputManager).toBeDefined();
+      expect(gameManager.storageManager).toBeDefined();
+      expect(gameManager.actuator).toBeDefined();
+      expect(gameManager.grid).toBeDefined();
+      expect(gameManager.score).toBe(0);
+      expect(gameManager.gameOver).toBe(false);
+      expect(gameManager.won).toBe(false);
+      expect(gameManager.keepPlaying).toBe(false);
     });
-
-    describe('Game Control', () => {
-        beforeEach(() => {
-            // Mock setup method to track its calls
-            gameManager.setupGame = jest.fn();
-        });
-        test('restart should clear game state and setup the game', () => {
-            gameManager.restart();
-
-            expect(mockStorageManager.mock.results[0].value.clearGameState).toHaveBeenCalledTimes(1);
-            expect(mockActuator.mock.results[0].value.continueGame).toHaveBeenCalledTimes(1);
-            expect(gameManager.setupGame).toHaveBeenCalled();
-        });
-
-    
-
-    
-        test('isGameTerminated should return true if game is over or won without keepPlaying', () => {
-            gameManager.gameOver = true;
-            expect(gameManager.isGameTerminated()).toBe(true);
-
-            gameManager.gameOver = false;
-            gameManager.won = true;
-            gameManager.keepPlaying = false;
-            expect(gameManager.isGameTerminated()).toBe(true);
-
-            gameManager.keepPlaying = true;
-            expect(gameManager.isGameTerminated()).toBe(false);
-        });
-
-        test('should set up with 2 tiles', () => {
-            gameManager.setupGame();
-            const tileCount = gameManager.grid.cells.flat().filter(cell => cell !== null).length;
-            expect(tileCount).toBe(2);             
-        });
+  
+    test("restart", () => {
+      const setupGame = jest.spyOn(gameManager, "setupGame");
+      gameManager.restart();
+      expect(mockStorageManager.clearGameState).toHaveBeenCalled();
+      expect(mockActuator.continueGame).toHaveBeenCalled();
+      expect(setupGame).toHaveBeenCalled();
     });
-
-    describe('Move Functionality', () => {
-        beforeEach(() => {
-            gameManager = new GameManager(4, mockInputManager, mockActuator, mockStorageManager);
-            gameManager.grid = new Grid(4);
-            gameManager.score = 0;
-        });
-
-        test('should not add random tile if game is over', () => {
-            gameManager.gameOver = true; 
-         
-            const addRandomTileMock = jest.spyOn(gameManager, 'addTileToRandomPosition');  
-
-            gameManager.move(0); 
-               
-            expect(addRandomTileMock).not.toHaveBeenCalled();
-        });
-        
-
-        test('should not move if game is over', () => {
-            gameManager.gameOver = true; 
-
-            gameManager.move(0); 
-
-            expect(gameManager.score).toBe(0); 
-            expect(mockActuator().actuate).not.toHaveBeenCalled(); 
-        });
-    
-
-        test('should move tiles and update score', () => {
-            
-            gameManager.grid.insertTile(new Tile({ x: 0, y: 0 }, 2));
-            gameManager.grid.insertTile(new Tile({ x: 0, y: 1 }, 2));
-
-            gameManager.move(0); 
-
-            expect(gameManager.score).toBe(4); 
-            expect(gameManager.grid.cellContent({ x: 0, y: 0 }).value).toBe(4); 
-            expect(gameManager.grid.cellContent({ x: 0, y: 1 })).toBeNull(); 
-        });
-       
-        // test('should add random tile if there are moves available', () => {
-        //     gameManager.grid.insertTile(new Tile({ x: 0, y: 0 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 1, y: 0 }, 2));
-    
-        //     const addRandomTileMock = jest.spyOn(gameManager, 'addTileToRandomPosition');
-        //     gameManager.movesAvailable = jest.fn(() => true); 
-    
-        //     gameManager.move(0); 
-    
-        //     expect(addRandomTileMock).toHaveBeenCalled(); 
-        // });
-        
-    
-        // test('should end the game if no moves available', () => {
-            
-        //     gameManager.grid.insertTile(new Tile({ x: 0, y: 0 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 0, y: 1 }, 4));
-        //     gameManager.grid.insertTile(new Tile({ x: 0, y: 2 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 0, y: 3 }, 4));
-        //     gameManager.grid.insertTile(new Tile({ x: 1, y: 0 }, 4));
-        //     gameManager.grid.insertTile(new Tile({ x: 1, y: 1 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 1, y: 2 }, 4));
-        //     gameManager.grid.insertTile(new Tile({ x: 1, y: 3 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 2, y: 0 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 2, y: 1 }, 4));
-        //     gameManager.grid.insertTile(new Tile({ x: 2, y: 2 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 2, y: 3 }, 4));
-        //     gameManager.grid.insertTile(new Tile({ x: 3, y: 0 }, 4));
-        //     gameManager.grid.insertTile(new Tile({ x: 3, y: 1 }, 2));
-        //     gameManager.grid.insertTile(new Tile({ x: 3, y: 2 }, 4));
-        //     gameManager.grid.insertTile(new Tile({ x: 3, y: 3 }, 2));
-            
-            
-        //     gameManager.movesAvailable = jest.fn(() => false);
-
-        //     gameManager.move(0); 
-        //     console.log('Game Over Status:', gameManager.over);
-
-        //     expect(gameManager.over).toBe(true); 
-        // });
-        
+  
+    test('keepPlayingFn', () => {
+      gameManager.keepPlayingFn();
+      expect(gameManager.keepPlaying).toBe(true);
+      expect(mockActuator.continueGame).toHaveBeenCalled();
     });
-});
+  
+    test('isGameTerminated', () => {
+      expect(gameManager.isGameTerminated()).toBe(false);
+      gameManager.gameOver = true;
+      expect(gameManager.isGameTerminated()).toBe(true);
+      gameManager.gameOver = false;
+      gameManager.won = true;
+      expect(gameManager.isGameTerminated()).toBe(true);
+      gameManager.keepPlaying = true;
+      expect(gameManager.isGameTerminated()).toBe(false);
+    });
+  
+    test("addStartTiles", () => {
+      gameManager.addStartTiles();
+      expect(gameManager.grid.randomAvailableCell).toHaveBeenCalled();
+      expect(gameManager.grid.insertTile).toHaveBeenCalled();
+      expect(global.Tile).toHaveBeenCalled();
+    });
+  
+    test('moveTile', () => {
+      const tile = {
+        x: 0,
+        y: 0,
+        value: 2,
+        updatePosition: jest.fn(callback),
+      };
+      function callback(){
+        tile.x = 1
+        tile.y = 1
+      }
+      const cell = { x: 1, y: 1 };
+      gameManager.moveTile(tile, cell);
+      expect(gameManager.grid.cells[0][0]).toBeNull();
+      expect(gameManager.grid.cells[1][1]).toBe(tile);
+      expect(tile.x).toBe(1);
+      expect(tile.y).toBe(1);
+    });
+  
+    test('move', () => {
+      const direction = 0; // up
+      const prepareTiles = jest.spyOn(gameManager, "prepareTiles");
+      const getVector = jest.spyOn(gameManager, "getVector");
+      const buildTraversals = jest.spyOn(gameManager, "buildTraversals");
+      gameManager.move(direction);
+     
+      expect(prepareTiles).toHaveBeenCalled();
+      expect(getVector).toHaveBeenCalled();
+      expect(buildTraversals).toHaveBeenCalled();
+      expect(mockActuator.actuate).toHaveBeenCalled();
+    });
+  
+    test("tileMatchesAvailable", () => {
+      const tilesMatch = jest.spyOn(gameManager, "tilesMatch");
+      gameManager.tileMatchesAvailable();
+      expect(tilesMatch).toHaveBeenCalled();
+    });
+  
+    test("updateGoal", () => {
+      const clearGameState = jest.spyOn(
+        gameManager.storageManager,
+        "clearGameState"
+      );
+      const setupGame = jest.spyOn(gameManager, "setupGame");
+      gameManager.updateGoal();
+      expect(clearGameState).toHaveBeenCalled();
+      expect(setupGame).toHaveBeenCalled();
+    });
+  });

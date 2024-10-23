@@ -10,34 +10,40 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager) {
 
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
-  this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
+  this.inputManager.on("keepPlayingFn", this.keepPlayingFn.bind(this));
 
-  rangeInput.addEventListener("input", () => {
+
+  
+  this.rangeInput = document.getElementById("rangeInput");
+  this.rangeValueDisplay = document.getElementById("rangeValue");
+  this.introDisplay = document.getElementById("intro");
+
+  this.speedrangeInput = document.getElementById("speedRangeInput"); // Corrected ID for speed input
+  this.speedrangeValueDisplay = document.getElementById("speedRangeValue");
+  this.speedintroDisplay = document.getElementById("speedIntro");
+  // Default Values
+  this.speedrangeInput.value = 3;
+  this.speedrangeValueDisplay.textContent = "Default";
+  
+  // Default Values
+  this.rangeInput.value = 4;
+  this.rangeValueDisplay.textContent = 2048;
+
+  // Default Values
+  this.rangeInput.value = 4;
+  this.rangeValueDisplay.textContent = 2048;
+
+  this.rangeInput.addEventListener("input", () => {
     this.updateGoal();
   });
 
-  speedrangeInput.addEventListener("input", () => {
+  this.speedrangeInput.addEventListener("input", () => {
     this.updateSpeed();
   });
   this.setupGame();
 }
 
-const rangeInput = document.getElementById("rangeInput");
-const rangeValueDisplay = document.getElementById("rangeValue");
-const introDisplay = document.getElementById("intro");
 
-const speedrangeInput = document.getElementById("speedRangeInput"); // Corrected ID for speed input
-const speedrangeValueDisplay = document.getElementById("speedRangeValue");
-const speedintroDisplay = document.getElementById("speedIntro");
-
-
-// Default Values
-speedrangeInput.value = 3;
-speedrangeValueDisplay.textContent = "Default";
-
-// Default Values
-rangeInput.value = 4;
-rangeValueDisplay.textContent = 2048;
 
 // Update the tile target
 GameManager.prototype.updateGoal = function () {
@@ -46,8 +52,8 @@ GameManager.prototype.updateGoal = function () {
   // Target is always a multiple of 2
   const tickValue = 128 * Math.pow(2, sliderValue);
 
-  rangeValueDisplay.textContent = tickValue;
-  introDisplay.textContent =  tickValue.toString()+" tile!";
+  this.rangeValueDisplay.textContent = tickValue;
+  this.introDisplay.textContent =  tickValue.toString()+" tile!";
   
   this.scoreGoal = tickValue;
   this.storageManager.clearGameState();
@@ -78,7 +84,7 @@ GameManager.prototype.restart = function () {
   this.setupGame();
 };
 
-GameManager.prototype.keepPlaying = function () {
+GameManager.prototype.keepPlayingFn = function () {
   this.keepPlaying = true;
   this.actuator.continueGame(); // Clear the game won/lost message
 };
@@ -322,3 +328,5 @@ GameManager.prototype.tilesMatch = function(x, y){
 GameManager.prototype.positionsEqual = function (first, second) {
   return first.x === second.x && first.y === second.y;
 };
+
+module.exports = GameManager;

@@ -141,7 +141,7 @@ KeyboardInputManager.prototype.restart = function (event) {
 
 KeyboardInputManager.prototype.keepPlaying = function (event) {
   event.preventDefault();
-  this.emit("keepPlaying");
+  this.emit("keepPlayingFn");
 };
 
 KeyboardInputManager.prototype.bindButtonPress = function (selector, fn) {
@@ -149,3 +149,6 @@ KeyboardInputManager.prototype.bindButtonPress = function (selector, fn) {
   button.addEventListener("click", fn.bind(this));
   button.addEventListener(this.eventTouchend, fn.bind(this));
 };
+
+
+module.exports = KeyboardInputManager;

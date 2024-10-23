@@ -18,6 +18,10 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager) {
   this.rangeValueDisplay = document.getElementById("rangeValue");
   this.introDisplay = document.getElementById("intro");
 
+  const speedrangeInput = document.getElementById("speedRangeInput"); // Corrected ID for speed input
+  const speedrangeValueDisplay = document.getElementById("speedRangeValue");
+  const speedintroDisplay = document.getElementById("speedIntro");
+
   // Default Values
   this.rangeInput.value = 4;
   this.rangeValueDisplay.textContent = 2048;
@@ -31,14 +35,6 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager) {
   });
   this.setupGame();
 }
-
-const rangeInput = document.getElementById("rangeInput");
-const rangeValueDisplay = document.getElementById("rangeValue");
-const introDisplay = document.getElementById("intro");
-
-const speedrangeInput = document.getElementById("speedRangeInput"); // Corrected ID for speed input
-const speedrangeValueDisplay = document.getElementById("speedRangeValue");
-const speedintroDisplay = document.getElementById("speedIntro");
 
 
 // Default Values
@@ -332,7 +328,5 @@ GameManager.prototype.tilesMatch = function(x, y){
 GameManager.prototype.positionsEqual = function (first, second) {
   return first.x === second.x && first.y === second.y;
 };
-
-
 
 module.exports = GameManager;

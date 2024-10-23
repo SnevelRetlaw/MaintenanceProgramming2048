@@ -1,4 +1,23 @@
-const html = ` <div class="container">
+const html = `<!DOCTYPE html>
+<html lang>
+<head>
+  <meta charset="utf-8">
+  <title>2048</title>
+
+  <link href="style/main.css" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="meta/apple-touch-icon.png">
+  <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x1096.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"> <!-- iPhone 5+ -->
+  <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x920.png"  media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)"> <!-- iPhone, retina -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <div class="container">
     <div class="heading">
       <h1 class="title">2048</h1>
       <div class="scores-container">
@@ -54,7 +73,7 @@ const html = ` <div class="container">
 
     <details id="settingsExpandable">
       <summary>Game Settings</summary>
-      <div id="scoreSliderContainer">
+      <div class="settingsSection" id="scoreSliderContainer">
       <p>Tile Goal: <span id="rangeValue"></span></p>
         <fieldset class="range__field">
           <input class="range" type="range" width="100%" min="0" max="9" id="rangeInput">
@@ -71,6 +90,25 @@ const html = ` <div class="container">
             <rect x="99%" y="3" width="1" height="10"></rect>
           </svg>
         </fieldset></div>
+
+        <hr class="solid">
+
+
+        <div class="settingsSection" id="speedSliderContainer">
+          <p>Animation Speed: <span id="speedRangeValue">default</span></p>
+          <fieldset class="range__field">
+            <input class="range" type="range" min="1" max="5" id="speedRangeInput" value="2">
+            <svg width="100%" height="20">
+              <rect x="0%" y="3" width="1" height="10"></rect>
+              <rect x="20%" y="3" width="1" height="10"></rect>
+              <rect x="40%" y="3" width="1" height="10"></rect>
+              <rect x="60%" y="3" width="1" height="10"></rect>
+              <rect x="80%" y="3" width="1" height="10"></rect>
+              <rect x="100%" y="3" width="1" height="10"></rect>
+            </svg>
+          </fieldset>
+        </div>
+        
     </details>
 
     <p class="game-explanation">
@@ -84,7 +122,21 @@ const html = ` <div class="container">
     <p>
     Created by <a href="http://gabrielecirulli.com" target="_blank">Gabriele Cirulli.</a> Based on <a href="https://itunes.apple.com/us/app/1024!/id823499224" target="_blank">1024 by Veewo Studio</a> and conceptually similar to <a href="http://asherv.com/threes/" target="_blank">Threes by Asher Vollmer.</a>
     </p>
-  </div>`;
+  </div>
+
+  <script src="js/bind_polyfill.js"></script>
+  <script src="js/classlist_polyfill.js"></script>
+  <script src="js/animframe_polyfill.js"></script>
+  <script src="js/keyboard_input_manager.js"></script>
+  <script src="js/html_actuator.js"></script>
+  <script src="js/grid.js"></script>
+  <script src="js/tile.js"></script>
+  <script src="js/local_storage_manager.js"></script>
+  <script src="js/game_manager.js"></script>
+  <script src="js/application.js"></script>
+</body>
+</html>
+`;
 
 
 module.exports = html;

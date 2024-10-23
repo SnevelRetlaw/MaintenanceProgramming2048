@@ -1,309 +1,158 @@
-const Grid = require('./grid');
-const Tile = require('./tile');
+global.Grid = jest.fn().mockImplementation((size) => ({
+  size: size,
+  cells: Array(size)
+    .fill()
+    .map(() => Array(size).fill(null)),
+  availableCells: jest.fn(() => [{ x: 0, y: 0 }]),
+  randomAvailableCell: jest.fn(() => ({ x: 0, y: 0 })),
+  insertTile: jest.fn(),
+  removeTile: jest.fn(),
+  withinBounds: jest.fn(() => true),
+  cellsAvailable: jest.fn(() => true),
+  cellOccupied: jest.fn(() => false),
+  cellContent: jest.fn(() => null),
+  eachCell: jest.fn(),
+  serialize: jest.fn(() => ({ size: size, cells: [] })),
+}));
 
-function GameManager(gridSize, InputManager, Actuator, StorageManager, scoreGoal) {
+global.Tile = jest.fn().mockImplementation((position, value) => ({
+  x: position.x,
+  y: position.y,
+  value: value,
+  updatePosition: jest.fn(),
+}));
 
-  this.gridSize           = gridSize; // Size of the grid
-  this.inputManager   = new InputManager;
-  this.storageManager = new StorageManager;
-  this.actuator       = new Actuator;
-  this.scoreGoal = 2048;
+const innerHTML = require("./html_string_test.js");
+const GameManager = require("../js/game_manager.js");
 
-  this.startTiles     = 2;
+const mockInputManager = {
+  on: jest.fn(),
+};
 
-  this.inputManager.on("move", this.move.bind(this));
-  this.inputManager.on("restart", this.restart.bind(this));
-  this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
+const mockActuator = {
+  actuate: jest.fn(),
+  continueGame: jest.fn(),
+};
 
-  rangeInput.addEventListener("input", () => {
-    this.updateGoal();
+const mockStorageManager = {
+  getGameState: jest.fn(() => null),
+  clearGameState: jest.fn(),
+  setGameState: jest.fn(),
+  getBestScore: jest.fn(() => 0),
+  setBestScore: jest.fn(),
+};
+
+describe("GameManager", () => {
+  let gameManager;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    document.body.innerHTML = innerHTML; // 添加html到模拟dom环境中可以在代码中获取dom元素
+    gameManager = new GameManager(
+      4,
+      function () {
+        return mockInputManager;
+      },
+      function () {
+        return mockActuator;
+      },
+      function () {
+        return mockStorageManager;
+      } // 箭头函数是不能new对象的因为没有自己的this
+    );
   });
 
-  this.setupGame();
-
-  this.setupDOM();
-  
-  this.setupGame();
-}
-module.exports = GameManager;
-
-GameManager.prototype.setupDOM = function () {
-  const rangeInput = document.getElementById("rangeInput");
-  const rangeValueDisplay = document.getElementById("rangeValue");
-  const introDisplay = document.getElementById("intro");
-
-  
-  rangeInput.value = 4;
-  rangeValueDisplay.textContent = 2048;
-
-  
-  rangeInput.addEventListener("input", () => {
-    this.updateGoal();
-  });
-};
-
-// Update the tile target
-GameManager.prototype.updateGoal = function () {
-  const sliderValue = parseInt(rangeInput.value);
-
-  // Target is always a multiple of 2
-  const tickValue = 128 * Math.pow(2, sliderValue);
-
-  rangeValueDisplay.textContent = tickValue;
-  introDisplay.textContent =  tickValue.toString()+" tile!";
-  
-  this.scoreGoal = tickValue;
-  this.storageManager.clearGameState();
-  this.setupGame();
-  
-};
-
-
-GameManager.prototype.restart = function () {
-  this.storageManager.clearGameState();
-  this.actuator.continueGame(); // Clear the game won/lost message
-  this.setupGame();
-};
-
-GameManager.prototype.keepPlaying = function () {
-  this.keepPlaying = true;
-  this.actuator.continueGame(); // Clear the game won/lost message
-};
-
-
-GameManager.prototype.isGameTerminated = function () {
-  return this.gameOver || (this.won && !this.keepPlaying);
-};
-
-GameManager.prototype.setupGame = function () {
-  let previousState = this.storageManager.getGameState();
-
-  if (previousState) {
-    this.grid        = new Grid(previousState.grid.size,
-                                previousState.grid.cells); // Reload grid
-    this.score       = previousState.score;
-    this.gameOver    = previousState.gameOver;
-    this.won         = previousState.won;
-    this.keepPlaying = previousState.keepPlaying;
-  } else {
-    this.grid        = new Grid(this.gridSize);
-    this.score       = 0;
-    this.gameOver        = false;
-    this.won         = false;
-    this.keepPlaying = false;
-
-    this.addStartTiles();
-  }
-
-  this.actuate();
-};
-
-GameManager.prototype.addStartTiles = function () {
-  for (let i = 0; i < this.startTiles; i++) {
-    this.addTileToRandomPosition();
-  }
-};
-
-GameManager.prototype.addTileToRandomPosition = function () {
-  if (this.grid.cellsAvailable()) {
-    let value = Math.random() < 0.9 ? 2 : 4;
-    let tile = new Tile(this.grid.randomAvailableCell(), value);
-
-    this.grid.insertTile(tile);
-  }
-};
-
-// Sends the updated grid to the actuator
-GameManager.prototype.actuate = function () {
-  if (this.storageManager.getBestScore() < this.score) {
-    this.storageManager.setBestScore(this.score);
-  }
-
-  if (this.gameOver) {
-    this.storageManager.clearGameState();
-  } else {
-    this.storageManager.setGameState(this.serialize());
-  }
-
-  this.actuator.actuate(this.grid, {
-    score:      this.score,
-    gameOver:   this.gameOver,
-    won:        this.won,
-    bestScore:  this.storageManager.getBestScore(),
-    terminated: this.isGameTerminated()
+  test("initialization", () => {
+    expect(gameManager.gridSize).toBe(4);
+    expect(gameManager.startTiles).toBe(2);
+    expect(gameManager.inputManager).toBeDefined();
+    expect(gameManager.storageManager).toBeDefined();
+    expect(gameManager.actuator).toBeDefined();
+    expect(gameManager.grid).toBeDefined();
+    expect(gameManager.score).toBe(0);
+    expect(gameManager.gameOver).toBe(false);
+    expect(gameManager.won).toBe(false);
+    expect(gameManager.keepPlaying).toBe(false);
   });
 
-};
+  test("restart", () => {
+    const setupGame = jest.spyOn(gameManager, "setupGame");
+    gameManager.restart();
+    expect(mockStorageManager.clearGameState).toHaveBeenCalled();
+    expect(mockActuator.continueGame).toHaveBeenCalled();
+    expect(setupGame).toHaveBeenCalled();
+  });
 
-// Represent the current game as an object
-GameManager.prototype.serialize = function () {
-  return {
-    grid:        this.grid.serialize(),
-    score:       this.score,
-    gameOver:    this.gameOver,
-    won:         this.won,
-    keepPlaying: this.keepPlaying
-  };
-};
+  test('keepPlayingFn', () => {
+    gameManager.keepPlayingFn();
+    expect(gameManager.keepPlaying).toBe(true);
+    expect(mockActuator.continueGame).toHaveBeenCalled();
+  });
 
-GameManager.prototype.prepareTiles = function () {
-  this.grid.eachCell(function (x, y, tile) {
-    if (tile) {
-      tile.mergedFrom = null;
-      tile.savePosition();
+  test('isGameTerminated', () => {
+    expect(gameManager.isGameTerminated()).toBe(false);
+    gameManager.gameOver = true;
+    expect(gameManager.isGameTerminated()).toBe(true);
+    gameManager.gameOver = false;
+    gameManager.won = true;
+    expect(gameManager.isGameTerminated()).toBe(true);
+    gameManager.keepPlaying = true;
+    expect(gameManager.isGameTerminated()).toBe(false);
+  });
+
+  test("addStartTiles", () => {
+    gameManager.addStartTiles();
+    expect(gameManager.grid.randomAvailableCell).toHaveBeenCalled();
+    expect(gameManager.grid.insertTile).toHaveBeenCalled();
+    expect(global.Tile).toHaveBeenCalled();
+  });
+
+  test('moveTile', () => {
+    const tile = {
+      x: 0,
+      y: 0,
+      value: 2,
+      updatePosition: jest.fn(callback),
+    };
+    function callback(){
+      tile.x = 1
+      tile.y = 1
     }
-  });
-};
-
-GameManager.prototype.moveTile = function (tile, cell) {
-  this.grid.cells[tile.x][tile.y] = null;
-  this.grid.cells[cell.x][cell.y] = tile;
-  tile.updatePosition(cell);
-};
-
-GameManager.prototype.mergeTile = function(self, movingTile, stationaryTilePosition, stationaryTileContent){
-  let mergedTile = new Tile(stationaryTilePosition, movingTile.value * 2);
-  mergedTile.mergedFrom = [movingTile, stationaryTileContent];
-
-  self.grid.insertTile(mergedTile);
-  self.grid.removeTile(movingTile);
-
-  movingTile.updatePosition(stationaryTilePosition);
-
-  self.score += mergedTile.value;
-  if (mergedTile.value === this.scoreGoal) self.won = true;
-}
-
-// Move tiles on the grid in the specified direction
-GameManager.prototype.move = function (direction) {
-  let self = this;
-
-  if (this.isGameTerminated()) return;
-
-  let vector     = this.getVector(direction);
-  let traversals = this.buildTraversals(vector);
-  let gridMoved  = false;
-
-  this.prepareTiles();
-
-  traversals.x.forEach(function (x) {
-    traversals.y.forEach(function (y) {
-      const cell = { x: x, y: y };
-      const tileHasMoved = self.mergeOrMoveTile(cell, self, vector);
-      if (tileHasMoved){
-        gridMoved = true;
-      }
-    });
+    const cell = { x: 1, y: 1 };
+    gameManager.moveTile(tile, cell);
+    expect(gameManager.grid.cells[0][0]).toBeNull();
+    expect(gameManager.grid.cells[1][1]).toBe(tile);
+    expect(tile.x).toBe(1);
+    expect(tile.y).toBe(1);
   });
 
-  if (gridMoved) {
-    this.addTileToRandomPosition();
+  test('move', () => {
+    const direction = 0; // up
+    const prepareTiles = jest.spyOn(gameManager, "prepareTiles");
+    const getVector = jest.spyOn(gameManager, "getVector");
+    const buildTraversals = jest.spyOn(gameManager, "buildTraversals");
+    gameManager.move(direction);
+   
+    expect(prepareTiles).toHaveBeenCalled();
+    expect(getVector).toHaveBeenCalled();
+    expect(buildTraversals).toHaveBeenCalled();
+    expect(mockActuator.actuate).toHaveBeenCalled();
+  });
 
-    if (!this.movesAvailable()) {
-      this.gameOver = true;
-    }
+  test("tileMatchesAvailable", () => {
+    const tilesMatch = jest.spyOn(gameManager, "tilesMatch");
+    gameManager.tileMatchesAvailable();
+    expect(tilesMatch).toHaveBeenCalled();
+  });
 
-    this.actuate();
-  }
-};
-
-GameManager.prototype.mergeOrMoveTile = function (cell, self, vector){
-
-  const tile = self.grid.cellContent(cell);
-
-  if (!tile) return;
-  
-  let farthestCells        = self.findFarthestFreeAndOccupiedCell(cell, vector);
-  let nextOccupiedCellContent  = self.grid.cellContent(farthestCells.occupied);
-
-  if (self.shouldBeMerged(tile, nextOccupiedCellContent)) {
-    self.mergeTile(self, tile, farthestCells.occupied, nextOccupiedCellContent)
-  } else {
-    self.moveTile(tile, farthestCells.free);
-  }
-
-  return !self.positionsEqual(cell, tile)
-};
-
-GameManager.prototype.shouldBeMerged = function (tile, nextCell){
-  return nextCell && nextCell.value === tile.value && !nextCell.mergedFrom
-}
-
-GameManager.prototype.getVector = function (direction) {
-  let map = {
-    0: { x: 0,  y: -1 }, // Up
-    1: { x: 1,  y: 0 },  // Right
-    2: { x: 0,  y: 1 },  // Down
-    3: { x: -1, y: 0 }   // Left
-  };
-
-  return map[direction];
-};
-
-GameManager.prototype.buildTraversals = function (vector) {
-  let traversals = { x: [], y: [] };
-
-  for (let pos = 0; pos < this.gridSize; pos++) {
-    traversals.x.push(pos);
-    traversals.y.push(pos);
-  }
-
-  // Always traverse from the farthest cell in the chosen direction
-  if (vector.x === 1) traversals.x = traversals.x.toReversed();
-  if (vector.y === 1) traversals.y = traversals.y.toReversed();
-
-  return traversals;
-};
-
-GameManager.prototype.findFarthestFreeAndOccupiedCell = function (cell, vector) {
-  let previous;
-
-  // Progress towards the vector direction until an obstacle is found
-  do {
-    previous = cell;
-    cell     = { x: previous.x + vector.x, y: previous.y + vector.y };
-  } while (this.grid.withinBounds(cell) &&
-           this.grid.cellAvailable(cell));
-
-  return {
-    free: previous,
-    occupied: cell
-  };
-};
-
-GameManager.prototype.movesAvailable = function () {
-  return this.grid.cellsAvailable() || this.tileMatchesAvailable();
-};
-
-GameManager.prototype.tileMatchesAvailable = function () {
-  for (let x = 0; x < this.gridSize; x++) {
-    for (let y = 0; y < this.gridSize; y++) {
-      if (this.tilesMatch(x, y)) return true
-    }
-  }
-
-  return false;
-};
-
-GameManager.prototype.tilesMatch = function(x, y){  
-  let self = this;
-  let tile;
-
-  tile = this.grid.cellContent({ x: x, y: y });
-
-  if (!tile) return false 
-  for (let direction = 0; direction < 4; direction++) {
-    let vector = self.getVector(direction);
-    let cell   = { x: x + vector.x, y: y + vector.y };
-
-    let other  = self.grid.cellContent(cell);
-
-    if (other && other.value === tile.value) {
-      return true;
-    }
-  }
-}
-
-GameManager.prototype.positionsEqual = function (first, second) {
-  return first.x === second.x && first.y === second.y;
-};
+  test("updateGoal", () => {
+    const clearGameState = jest.spyOn(
+      gameManager.storageManager,
+      "clearGameState"
+    );
+    const setupGame = jest.spyOn(gameManager, "setupGame");
+    gameManager.updateGoal();
+    expect(clearGameState).toHaveBeenCalled();
+    expect(setupGame).toHaveBeenCalled();
+  });
+});

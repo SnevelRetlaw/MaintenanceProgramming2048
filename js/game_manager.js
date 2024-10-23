@@ -1,6 +1,3 @@
-const Grid = require('./grid');
-const Tile = require('./tile');
-
 function GameManager(gridSize, InputManager, Actuator, StorageManager, scoreGoal) {
 
   this.gridSize           = gridSize; // Size of the grid
@@ -13,34 +10,25 @@ function GameManager(gridSize, InputManager, Actuator, StorageManager, scoreGoal
 
   this.inputManager.on("move", this.move.bind(this));
   this.inputManager.on("restart", this.restart.bind(this));
-  this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
+  this.inputManager.on("keepPlayingFn", this.keepPlayingFn.bind(this));
 
-  rangeInput.addEventListener("input", () => {
+
+  
+  this.rangeInput = document.getElementById("rangeInput");
+  this.rangeValueDisplay = document.getElementById("rangeValue");
+  this.introDisplay = document.getElementById("intro");
+
+  // Default Values
+  this.rangeInput.value = 4;
+  this.rangeValueDisplay.textContent = 2048;
+
+  this.rangeInput.addEventListener("input", () => {
     this.updateGoal();
   });
 
-  this.setupGame();
-
-  this.setupDOM();
-  
   this.setupGame();
 }
-module.exports = GameManager;
 
-GameManager.prototype.setupDOM = function () {
-  const rangeInput = document.getElementById("rangeInput");
-  const rangeValueDisplay = document.getElementById("rangeValue");
-  const introDisplay = document.getElementById("intro");
-
-  
-  rangeInput.value = 4;
-  rangeValueDisplay.textContent = 2048;
-
-  
-  rangeInput.addEventListener("input", () => {
-    this.updateGoal();
-  });
-};
 
 // Update the tile target
 GameManager.prototype.updateGoal = function () {
@@ -49,8 +37,8 @@ GameManager.prototype.updateGoal = function () {
   // Target is always a multiple of 2
   const tickValue = 128 * Math.pow(2, sliderValue);
 
-  rangeValueDisplay.textContent = tickValue;
-  introDisplay.textContent =  tickValue.toString()+" tile!";
+  this.rangeValueDisplay.textContent = tickValue;
+  this.introDisplay.textContent =  tickValue.toString()+" tile!";
   
   this.scoreGoal = tickValue;
   this.storageManager.clearGameState();
@@ -65,7 +53,7 @@ GameManager.prototype.restart = function () {
   this.setupGame();
 };
 
-GameManager.prototype.keepPlaying = function () {
+GameManager.prototype.keepPlayingFn = function () {
   this.keepPlaying = true;
   this.actuator.continueGame(); // Clear the game won/lost message
 };
@@ -307,3 +295,7 @@ GameManager.prototype.tilesMatch = function(x, y){
 GameManager.prototype.positionsEqual = function (first, second) {
   return first.x === second.x && first.y === second.y;
 };
+
+
+
+module.exports = GameManager;

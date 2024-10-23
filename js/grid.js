@@ -2,7 +2,7 @@ function Grid(size, previousState) {
   this.size = size;
   this.cells = previousState ? this.createGridFromState(previousState) : this.createEmptyGrid();
 }
-module.exports = Grid;
+
 Grid.prototype.createEmptyGrid = function () {
   let cells = [];
 
